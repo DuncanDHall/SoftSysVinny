@@ -10,7 +10,7 @@ The goal of this project is to create **Vinny**: a command-line text editor in C
 Ilya is interested in getting an introduction to vim. We also see this as an excellent project to put the concepts we've been learning about this year into practice. Creating a text editor will require careful memory management, file read/write, command line arguments, objects, and a carefully constructed architecture.
 
 ## Needed resources
-We intentionally chose this project because we feel confident we can jump in and use it as a test of the knowledge we've gained in this class. Unlike Cynthesis (our previous project) we do not anticipate working with any frameworks or new external libraries.
+We intentionally chose this project because we feel confident we can use it as a test of the knowledge we've gained in this class. Unlike Cynthesis (our previous project) we do not anticipate working with any frameworks or new external libraries.
 
 ## First steps
 
