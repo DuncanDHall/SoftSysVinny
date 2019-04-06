@@ -10,10 +10,11 @@
 #include <unistd.h>
 
 // TODO get only lines in frame
-char **read_lines_from_file(FILE *fp, int startline, int endline)
+void read_lines_from_file(FILE *fp, char **lines_array, int start_line, int n_lines)
 {
     rewind(fp); //rewinds pointer to top of file
-    char *array[endline - startline];
+
+    char *array[n_lines];
     int i; //array index
     char *line = NULL;
     size_t lsize;
@@ -35,10 +36,12 @@ char **read_lines_from_file(FILE *fp, int startline, int endline)
       /* Show the line details */
       printf("line[%06d]: chars=%06zd, buf size=%06zu, contents: %s", line_counter,
           line_size, lsize, line);
-      if(line_counter == startline){
+      //flag goes up: ready for reading
+      if(line_counter == start_line){
         writeflag = 1;
       }
-      if(line_counter == endline){
+      //flag goes down, done writing
+      if(line_counter == (start_line + n_lines)){
         writeflag = 0;
       }
       if(writeflag){
@@ -58,7 +61,6 @@ char **read_lines_from_file(FILE *fp, int startline, int endline)
         linecounter++;
     }
     */
-    return array;
 }
 
 //this function does this _____
@@ -73,24 +75,31 @@ int count_digits(int n)
 }
 
 //this function does tihs_____
-char **get_lines_to_print(FILE *fp, int top_line)
+// void get_lines_to_print(FILE *fp, char **lines_array, int start_line, int n_lines)
+// {
+//     int gutter_size;
+//     char **raw_lines;
+//     char **lines;
+//
+//     // get info about window size
+//     // calculate gutter size
+//     gutter_size = 2 + count_digits(top_line + n_env_lines);
+//
+//     // get raw lines
+//     raw_lines = read_lines_from_file(fp, lines_array, start_line, end_line);
+//
+//     // trim lines
+//     // lines = malloc(sizeof(char *[n_env_lines]));
+//     // for (int )
+//
+//     // draw line numbers
+// }
+
+void print_lines(char **lines_array, int n_lines)
 {
-    int gutter_size;
-    char **raw_lines;
-    char **lines;
-
-    // get info about window size
-    // calculate gutter size
-    gutter_size = 2 + count_digits(top_line + n_env_lines);
-
-    // get raw lines
-    raw_lines = read_lines_from_file(fp, top_line, top_line + n_env_cols);
-
-    // trim lines
-    // lines = malloc(sizeof(char *[n_env_lines]));
-    // for (int )
-
-    // draw line numbers
+    for (int i = 0; i < n_lines; i++) {
+        printf("%s\n", lines_array[i]);
+    }
 }
 
 int main (int argc, char *argv[])
@@ -118,10 +127,13 @@ int main (int argc, char *argv[])
     n_env_lines = w.ws_row;
     n_env_cols = w.ws_col;
 
-    get_lines_to_print()
+    // allocate space for 5 pointers to strings
+    lines_array = (char**) malloc(n_env_lines*sizeof(char*));
+    read_lines_from_file(fp, lines_array, top_line, n_env_lines);
 
-    char * array[100];
-    read_lines_from_file(fp,3,3); //reads lines
+    print_lines(lines_array, n_env_lines);
+
+    // read_lines_from_file(fp,lines_array, 3,3); //reads lines
 
     // this is how we get window dimensions
 
