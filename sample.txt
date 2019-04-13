@@ -1,7 +1,5 @@
 Hello World!
 This is line 2.
-this is line 3.
-line 4!
-blank
-blank
+This is line 3.
+something on 4.
 End of program.
