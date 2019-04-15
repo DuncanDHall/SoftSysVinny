@@ -9,7 +9,9 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-// TODO get only lines in frame
+
+// This function reads a file starting at start_line for n_lines and stores each
+// line in an array pointed to by lines_array_ptr.
 void read_lines_from_file(FILE *fp, char ***lines_array_ptr, int start_line, int n_lines)
 {
     char *line = NULL;
@@ -35,7 +37,7 @@ void read_lines_from_file(FILE *fp, char ***lines_array_ptr, int start_line, int
             //printf("WROTE LINE\n");
             //printf("Line is: %s\n", line);
         }
-        /* Increment our line count */
+        /* Increment our line counter */
         line_counter++;
     }
     while(line_counter < start_line + n_lines) {
@@ -57,7 +59,10 @@ int count_digits(int n)
     return c;
 }
 
-// TODO: this function does tihs_____
+// takes in the file pointer, array of pointers to line contents,
+// number of lines and number of columns
+// formats them to fill the terminal display window
+// adds line numbers with a gutter
 void get_formatted_lines(FILE *fp, char ***lines_array_ptr, int start_line, int n_lines, int n_cols)
 {
     int gutter_size;
@@ -81,6 +86,7 @@ void get_formatted_lines(FILE *fp, char ***lines_array_ptr, int start_line, int 
         );
         // memcopy raw into line
     }
+    *lines_array_ptr = raw_lines;
 
     // trim lines
     // lines = malloc(sizeof(char *[n_env_lines]));
