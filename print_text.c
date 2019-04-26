@@ -102,6 +102,34 @@ void print_lines(char ***lines_array_ptr, int n_lines)
     }
 }
 
+enum Mode {
+    Normal = 0;
+    Insert = 1;
+    Command = 2;
+};
+
+typedef struct {
+    char **lines;
+    int top_line;
+    int window_height, window_width;
+    int cursor_row, cursor_col;
+    Mode mode;
+} State;
+
+/* Make a State.
+*/
+Matrix *make_matrix(int num_rows, int num_cols) {
+    Matrix *matrix = malloc(sizeof(Matrix));
+    matrix->num_rows = num_rows;
+    matrix->num_cols = num_cols;
+    matrix->rows = malloc(num_rows * sizeof(double*));
+    for (int i=0; i<num_rows; i++) {
+        matrix->rows[i] = calloc(num_cols, sizeof(double));
+    }
+    return matrix;
+}
+
+
 int main (int argc, char *argv[])
 {
     // temp
@@ -118,6 +146,9 @@ int main (int argc, char *argv[])
         perror("Error while opening the file.\n");
         exit(EXIT_FAILURE); //bad news, quit program
     }
+
+    // load file into memory
+    // TODO: load file into state
 
     // get window dimensions
     if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &w)) {
