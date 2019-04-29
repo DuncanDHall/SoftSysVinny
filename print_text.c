@@ -12,13 +12,21 @@
 
 // This function reads a file starting at start_line for n_lines and stores each
 // line in an array pointed to by lines_array_ptr.
-void read_lines_from_file(FILE *fp, char ***lines_array_ptr, int start_line, int n_lines)
+void read_lines_from_file(FILE *fp, char ***lines_array_ptr)
 {
     char *line = NULL;
     size_t lsize;
-    int line_counter = 0;
-    //int index = 0;
-    rewind(fp); //rewinds pointer to top of file
+    int num_lines = 0;
+
+    int start_of_line = 0;
+    int len_current_line = 0;
+    char c;
+
+    while ((c = getc(fp)) != EOF) {
+
+    }
+
+    fseek(fp, 0, SEEK_END); //rewinds pointer to top of file
 
     //printf("reading thru file\n");
     /* Loop through until we are done with the file. */
@@ -102,23 +110,40 @@ void print_lines(char ***lines_array_ptr, int n_lines)
     }
 }
 
+
+//our three "modes" for the editor
 enum Mode {
     Normal = 0;
     Insert = 1;
     Command = 2;
 };
 
+
+//define the state of our window
 typedef struct {
     char **lines;
     int top_line;
     int window_height, window_width;
     int cursor_row, cursor_col;
     Mode mode;
+    // maybe some command history stuff
 } State;
 
 /* Make a State.
 */
-Matrix *make_matrix(int num_rows, int num_cols) {
+Matrix *make_state(int num_rows, int num_cols) {
+
+    State *state = malloc(sizeof(State)); //dynamically allocate memory
+
+    state->top_line = top; //get as parameter?
+    state->window_width = num_cols;
+    state->window_height = num_rows;
+    state->mode = Mode.Normal;
+
+    return state;
+}
+    // for reference:
+/*
     Matrix *matrix = malloc(sizeof(Matrix));
     matrix->num_rows = num_rows;
     matrix->num_cols = num_cols;
@@ -128,7 +153,7 @@ Matrix *make_matrix(int num_rows, int num_cols) {
     }
     return matrix;
 }
-
+*/
 
 int main (int argc, char *argv[])
 {
