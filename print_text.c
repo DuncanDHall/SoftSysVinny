@@ -227,7 +227,7 @@ void print_state(State *state, int num_columns, int num_rows){
             strncat(line, newline, line_length);
         }
         else{
-            strncat(line, newline, num_columns-gutter_size-1);
+            strncat(line, newline, num_columns-gutter_size-1); //dest, source, size
         }
         formatted_line_ptrs[i] = line;
     }

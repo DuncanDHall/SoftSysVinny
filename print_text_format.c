@@ -123,7 +123,7 @@ void print_lines(char **lines_array_ptr, int n_lines, int top)
 {
     // printf("printing lines\n");
     for (int j = top; j < (top + n_lines); j++) {
-        printf("%s\n",lines_array_ptr[j]);
+        printf("%s",lines_array_ptr[j]);
     }
 }
 
@@ -199,16 +199,16 @@ void print_state(State *state, int num_columns, int num_rows){
 
         // char line_number[gutter_size - 2];
         int offset = gutter_size - 2 - count_digits(i);
-        printf("offset is: %d\n", offset);
+        // printf("offset is: %d\n", offset);
         sprintf(new_line + offset, "%d", i); //convert int to string
-        // // printf("%s\n", new_line);
+        strcat(new_line, "  ");// // printf("%s\n", new_line);
 
-        // if(line_length + gutter_size < num_columns){
-        //     strncat(new_line, raw_line, line_length);
-        // }
-        // else{
-        //     strncat(new_line, raw_line, num_columns-gutter_size); //dest, source, size
-        // }
+        if(line_length + gutter_size < num_columns){
+            strncat(new_line, raw_line, line_length);
+        }
+        else{
+            strncat(new_line, raw_line, num_columns-gutter_size); //dest, source, size
+        }
         formatted_line_ptrs[i] = new_line; //line;
         // printf("line is: %s\n", line);
     }
