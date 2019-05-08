@@ -1,6 +1,6 @@
 /**//*
- * This program will load a text file and print it to screen
- * 4/2/2019
+ * VINNY IS ALMOST THERE
+ * 5/8/2019
  */
 
 #include <stdio.h>
@@ -11,8 +11,8 @@
 #include <termios.h>
 #include <assert.h>
 
-#define KNRM  "\x1B[0m" //standard color
-#define KMAG  "\x1B[35m" //magenta
+#define KNRM  "\x1B[0m"  // standard color
+#define KMAG  "\x1B[35m" // magenta
 #define KRED  "\x1B[31m"
 #define KGRN  "\x1B[32m"
 #define KYEL  "\x1B[33m"
@@ -28,8 +28,8 @@ int read_lines_from_file(char *file_name, char ***lines_array_ptr)
     size_t lsize;
     int n_lines = 0;
 
-    int start_of_line = 0;
-    int len_current_line = 0;
+    // int start_of_line = 0;
+    // int len_current_line = 0;
     char c;
     int line_counter = 0;
 
@@ -55,13 +55,6 @@ int read_lines_from_file(char *file_name, char ***lines_array_ptr)
 
     while(getline(&line, &lsize, fp) != -1) {
         lines_array[line_counter] = strdup(line);
-        //printf("Line is %s\n", line);
-        //
-        // /* Show the line details */
-        // printf("line[%06d]: chars=%06zd, buf size=%06zu, contents: %s", line_counter,
-        //  line_size, lsize, line);
-        // //printf("Conditional: %d, %d\n", line_counter >= start_line, line_counter < start_line + n_lines);
-        // /* Increment our line counter */
         line_counter++;
     }
     free(line); //free line buffer
@@ -72,9 +65,13 @@ int read_lines_from_file(char *file_name, char ***lines_array_ptr)
     return n_lines;
 }
 
-//this function does this _____
+//returns the number of digits in a number
 int count_digits(int n)
 {
+    if(n == 0){
+        return 1;
+    }
+
     int c = 0;
     while (n) {
         n = n / 10;
@@ -82,50 +79,6 @@ int count_digits(int n)
     }
     return c;
 }
-
-// takes in the file pointer, array of pointers to line contents,
-// number of lines and number of columns
-// formats them to fill the terminal display window
-// adds line numbers with a gutter
-/*
-void get_formatted_lines(State *state, char ***lines_array_ptr, int n_lines, int n_cols)
-{
-    int gutter_size;
-    char **raw_lines;
-    char *line;
-
-    // get info about window size
-    // calculate gutter size
-    gutter_size = 2 + count_digits(start_line + n_lines);
-
-    // get raw lines
-    //read_lines_from_file(fp, &raw_lines, start_line, n_lines);
-
-    int line_length = strlen(raw_lines[i])+1;
-
-    char **formatted_line_ptrs = malloc(sizeof(char*)*n_lines);
-    // write raw lines
-    for (int i = 0; i < n_lines; i++) {
-        line = malloc(n_cols * sizeof(char));
-        *formatted_line_ptrs[i] = line;
-        // memcopy raw into line (destination, source, number of bytes)
-        if(line_length + gutter_size < n_cols){
-            memcpy(
-                (void *)(&line + gutter_size),
-                (void *) raw_lines[i],
-                (line_length) * sizeof(char)
-            );
-        }
-    }
-    *lines_array_ptr = raw_lines;
-
-    // trim lines
-    // lines = malloc(sizeof(char *[n_env_lines]));
-    // for (int )
-
-    // draw line numbers
-}
-*/
 
 
 //our three "modes" for the editor
@@ -165,12 +118,18 @@ State *make_state(char *file_name) {
     return state;
 }
 
-
+/*
+ * prints a 2d array of characters
+ */
 void print_lines(char **lines_array_ptr, int n_lines, int top)
 {
-    // printf("printing lines\n");
+    printf("top: %d", top);
     for (int j = top; j < (top + n_lines); j++) {
+        printf("here\n");
         printf("%s",lines_array_ptr[j]);
+        if(j > 0) {
+            break;
+        }
     }
 }
 
@@ -203,8 +162,8 @@ void print_state(State *state, int num_columns, int num_rows){
     int gutter_size;
     // char **raw_lines;
     char *new_line;
-    char spaces[5] = "    ";
-    char zero[3] = "0";
+    // char spaces[5] = "    ";
+    // char zero[3] = "0";
     // char numbers[3];
     // calculate gutter size
     gutter_size = 2 + count_digits(state->top_line + num_rows);
@@ -213,7 +172,7 @@ void print_state(State *state, int num_columns, int num_rows){
     char **formatted_line_ptrs = malloc(sizeof(char*) * num_rows);
     // write raw lines
 
-    char strC[50];
+    // char strC[50];
 
     char *raw_line;
     int line_length;
@@ -259,10 +218,9 @@ void print_state(State *state, int num_columns, int num_rows){
         formatted_line_ptrs[i] = new_line; //line;
         // printf("line is: %s\n", line);
     }
-    print_lines(formatted_line_ptrs, num_rows - 1, state->top_line);
+    print_lines(formatted_line_ptrs, num_rows - 2, state->top_line);
     // print_lines((state->lines), 24);
 }
-
 
 
 /*
@@ -299,7 +257,7 @@ void move_cursor(State *state, int d_row, int d_col)
     state->cursor_col += d_col;
     if (state->cursor_col < 0) state->cursor_col = 0;
     if (state->cursor_col > line_len - 1) state->cursor_col = line_len - 1;
-    printf("cursor at row %d col %d\n", state->cursor_row, state->cursor_col);
+    // printf("cursor at row %d col %d\n", state->cursor_row, state->cursor_col);
 
     // adjust window position
     // TODO: fill this in
@@ -349,9 +307,6 @@ void insert_char(State *state, char c)
     strncpy(new_line, line, state->cursor_col);                        // first part
     new_line[state->cursor_col] = c;                                   // new char
     strcpy(new_line+(state->cursor_col)+1, line+(state->cursor_col));  // last part
-
-    // TODO remove this
-    printf("new_line: %s", new_line);
 
     state->lines[state->cursor_row] = strdup(new_line);
     state->cursor_col++;
@@ -404,15 +359,15 @@ void command_mode_handler(State *state, char input)
 void update_state(State *state, char input)
 {
     if (state->mode == normal) {
-        printf("Normal mode handling input: %c\n", input);
+        // printf("Normal mode handling input: %c\n", input);
         normal_mode_handler(state, input);
     }
     else if (state->mode == insert) {
-        printf("Insert mode handling input: %c\n", input);
+        // printf("Insert mode handling input: %c\n", input);
         insert_mode_handler(state, input);
     }
     else if (state->mode == command) {
-        printf("Command mode handling input: %c\n", input);
+        // printf("Command mode handling input: %c\n", input);
         command_mode_handler(state, input);
     }
 }
@@ -422,7 +377,7 @@ int main (int argc, char *argv[])
     // declarations
     struct winsize w;
     int n_env_lines, n_env_cols;
-    char **lines_array;
+    // char **lines_array;
     char input;
 
     // make state (reading from file)
@@ -454,10 +409,6 @@ int main (int argc, char *argv[])
     // write_state_to_file(argv[1]);
     // cleanup
     // free stuff
-
-
-
-
 
     return 0;
 }
