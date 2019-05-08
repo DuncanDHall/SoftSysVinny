@@ -20,14 +20,14 @@
 
 // Read all of the lines from file and put into an array
 // line in an array pointed to by lines_array_ptr .
-void read_lines_from_file(char *file_name, char ***lines_array_ptr)
+int read_lines_from_file(char *file_name, char ***lines_array_ptr)
 {
     char *line = NULL;
     size_t lsize;
     int num_lines = 0;
 
-    int start_of_line = 0;
-    int len_current_line = 0;
+    // int start_of_line = 0;
+    // int len_current_line = 0;
     char c;
     int line_counter = 0;
 
@@ -66,6 +66,7 @@ void read_lines_from_file(char *file_name, char ***lines_array_ptr)
     fclose(fp);
 
     *lines_array_ptr = lines_array;
+    return num_lines;
 }
 
 //this function counts the number of digits in a number
@@ -77,14 +78,6 @@ int count_digits(int n)
         c++;
     }
     return c;
-}
-
-
-void print_lines(char **lines_array_ptr, int n_lines)
-{
-    for (int i = 0; i < n_lines; i++) {
-        printf("%s\n",lines_array_ptr[i]);
-    }
 }
 
 
@@ -100,6 +93,7 @@ enum Mode {
 typedef struct {
     char **lines; // array of lines from our file
     char file_name[20];
+    int num_lines;
     int top_line; // the line index of first line to be displayed
     int window_height, window_width; // window dimensions
     int cursor_row, cursor_col; //referenced to lines not window
@@ -112,9 +106,9 @@ typedef struct {
 State *make_state(char *file_name) {
 
     State *state = malloc(sizeof(State)); //dynamically allocate memory
-    read_lines_from_file(file_name, &(state->lines));
+    state->num_lines = read_lines_from_file(file_name, &(state->lines));
     strcpy(state->file_name, file_name);
-    state->top_line = 5;
+    state->top_line = 3;
     // state->window_width = num_cols;
     // state->window_height = num_rows;
     state->mode = normal;
@@ -124,6 +118,14 @@ State *make_state(char *file_name) {
     return state;
 }
 
+
+void print_lines(char **lines_array_ptr, int n_lines, int top)
+{
+    // printf("printing lines\n");
+    for (int j = top; j < (top + n_lines); j++) {
+        printf("%s\n",lines_array_ptr[j]);
+    }
+}
 
 /*   Prints out the current "state" object
     -formatted lines
@@ -149,13 +151,14 @@ void print_state(State *state, int num_columns, int num_rows){
     //printf("\033[1;31m");
     printf(KMAG "FILE: %s," KCYN " MODE: %s.\n", state->file_name, mode_word);
     printf(KNRM);
+    // printf("Number of lines in file is: %d\n", state->num_lines);
     // int n_lines
     int gutter_size;
-    char **raw_lines;
-    char *line;
-    char spaces[5] = "   ";
+    // char **raw_lines;
+    char *new_line;
+    char spaces[5] = "    ";
     char zero[3] = "0";
-    char numbers[3];
+    // char numbers[3];
     // calculate gutter size
     gutter_size = 2 + count_digits(state->top_line + num_rows);
     // printf("Gutter is %d\n", gutter_size);
@@ -165,33 +168,51 @@ void print_state(State *state, int num_columns, int num_rows){
 
     char strC[50];
 
-    for (int i = state->top_line; i < num_rows; i++) {
-        line = malloc(num_columns * sizeof(char));
-        int line_length = strlen(state->lines[i]+1);
+    char *raw_line;
+    int line_length;
+    int b;
+
+    for (int i = state->top_line; i < (num_rows + state->top_line); i++) {
+        // printf("i is %d\n", i);
+        new_line = malloc((num_columns + 1) * sizeof(char));
         // printf("Line length is %d\n", line_length);
-        char *newline = (state->lines)[i];
 
-        // if less than 10
-        char result[50];
-        sprintf(result, "%d", i); //convert int to string
-        if(i < 10){
-            strncpy(strC, zero, 4);
-            strcat(strC, result);
-            strncpy(result, strC, 5);
+        if(i < state->num_lines){
+            // printf("IN IF STATEMENT #1\n");
+            raw_line = (state->lines)[i];
+            // printf("giberrish/ :%s\n", newline);
+             //accounting for endchar
+        }
+        else {
+            // printf("IN ELSE\n");
+            raw_line = "something\n";
         }
 
-        strncpy(line, result, 3);
-        strncat(line, spaces, 4);
-        if(line_length < num_columns){
-            strncat(line, newline, line_length);
+        line_length = strlen(raw_line);
+        // printf("newline is: %s\n", newline);
+
+        //fill gutter with spaces
+        for(b =0; b < gutter_size; b++) {
+            new_line[b] = ' ';
         }
-        else{
-            strncat(line, newline, num_columns-gutter_size-1);
-        }
-        formatted_line_ptrs[i] = line;
-        printf("line is: %s\n", line);
+        new_line[b] = 'c'; //adding null terminator
+
+        // char line_number[gutter_size - 2];
+        int offset = gutter_size - 2 - count_digits(i);
+        printf("offset is: %d\n", offset);
+        sprintf(new_line + offset, "%d", i); //convert int to string
+        // // printf("%s\n", new_line);
+
+        // if(line_length + gutter_size < num_columns){
+        //     strncat(new_line, raw_line, line_length);
+        // }
+        // else{
+        //     strncat(new_line, raw_line, num_columns-gutter_size); //dest, source, size
+        // }
+        formatted_line_ptrs[i] = new_line; //line;
+        // printf("line is: %s\n", line);
     }
-    print_lines(formatted_line_ptrs, state->top_line + num_rows - 1);
+    print_lines(formatted_line_ptrs, num_rows - 1, state->top_line);
     // print_lines((state->lines), 24);
 }
 
@@ -201,7 +222,7 @@ int main (int argc, char *argv[])
     // declarations
     struct winsize w;
     int n_env_lines, n_env_cols;
-    char **lines_array;
+    // char **lines_array;
 
     // make state (reading from file)
     State *state = make_state(argv[1]);
