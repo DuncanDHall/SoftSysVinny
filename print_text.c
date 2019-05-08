@@ -169,6 +169,7 @@ State *make_state(char *file_name) {
 void print_lines(char **lines_array_ptr, int n_lines, int top)
 {
     // printf("printing lines\n");
+    printf("top: %d", top);
     for (int j = top; j < (top + n_lines); j++) {
         printf("%s",lines_array_ptr[j]);
     }
