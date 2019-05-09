@@ -1,97 +1,24 @@
-1. You are my favorite person.
+Some random text about debugging:
 
-2. You make me happy.
+The actual amount of problems in the code is not 19.
+Sometimes when you fix one problem, several errors in
+the Error List will clear up.
 
-3. I’m proud to be with you.
+Other times, fixing one bug will reveal even more problems.
+Even though the number of errors in the list may not match the number
+of actual problems, the Error List is definitely helpful.
 
-4. Thank you for loving me.
+Logical errors: These types of errors are generally far more difficult to find and solve.
+IDEs usually aren't able to detect the problem.
+Logic errors are usually only discovered when the application gives you a result you weren't expecting, or behaves in another unexpected way.
 
-5. Thank you for letting me be the one to love you.
+15
+16
+17
+18
+19
+20
 
-6. I will always do my best with you.
+and then the end happened.
 
-7. Our relationship matters to me.
-
-8. I love your smile.
-
-9. You fascinate me.
-
-10. I admire you.
-
-11. How can I pray for you today?
-
-12. I’m kind of crazy about you.
-
-13. I’m thinking about you.
-
-14. Hey hot stuff
-
-15. I can’t wait to hug you
-
-16. Hey guess what?.. I really like you.
-
-17. Your eyes are my favorite.
-
-18. Date night soon?
-
-19. Hey don’t make plans tonight. I’m coming over.
-
-20. Can we take more cute pictures together?
-
-21. I will always be intentional with us.
-
-22. I hope you have a good day at work.
-
-23. Please be safe.
-
-24. You’re always on my mind.
-
-25. You’re my favorite notification.
-
-26. Thank you for being patient with me.
-
-27. You are an amazing partner.
-
-28. I’m so blessed to have you in my life.
-
-29. I am so attracted to you.
-
-30. You’re the first person I think of when I wake up.
-
-31. I’m your biggest fan.
-
-32. You’re the only one who can make me smile when I’m in a bad mood.
-
-33. You’re not only my lover, but you’re also my best friend.
-
-34. What should we do this weekend?
-
-35. We’re cute.
-
-36. Loving you was the second best thing I ever did. The first was finding you.
-
-37. You’re a game changer.
-
-38. You’re the first person I want to share news with.
-
-39. I don’t know why you put up with me, but wow, I’m glad you do.
-
-40. I choose you. And I’m going to keep choosing you.
-
-41. I know you’re busy, but I just wanted to remind you that I’m thinking about you.
-
-42. I care about you.
-
-43. You look beautiful today. I haven’t seen you yet, but I don’t have to.
-
-44. You add color to my world.
-
-45. Talking to you makes my day.
-
-46. I will always want you.
-
-47. You’re worth it.
-
-48. It’s crazy how much you add to my life.
-
-49. I don’t think you’ll ever realize how much you mean to me.
+P.S C IS STILL FUN< JUST HARD!!!!

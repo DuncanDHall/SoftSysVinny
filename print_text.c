@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <assert.h>
+#include <signal.h>
 
 #define KNRM  "\x1B[0m"  // standard color
 #define KMAG  "\x1B[35m" // magenta
@@ -111,7 +112,7 @@ State *make_state(char *file_name) {
     State *state = malloc(sizeof(State)); //dynamically allocate memory
     state->n_lines = read_lines_from_file(file_name, &(state->lines)); //TODO change to num_lines
     strcpy(state->file_name, file_name);
-    state->top_line = 5;
+    state->top_line = 0;
     // state->window_width = num_cols;
     // state->window_height = num_rows;
     state->mode = normal;
@@ -160,7 +161,7 @@ void print_state(State *state, int num_columns, int num_rows){
     //printf("\033[1;31m");
     //printf(BACK "TEST\n");
     //printf(NORM "STUFF\n");
-    printf(KMAG "FILE: %s," KCYN " MODE: %s.\n", state->file_name, mode_word);
+    printf(KMAG "\nFILE: %s," KCYN " MODE: %s," KYEL " CURSOR %d, %d," KRED " TYPE ':q' TO EXIT\n", state->file_name, mode_word, state->cursor_row, state->cursor_col);
     printf(KNRM);
     // printf("%s\n");
     // printf("Number of lines in file is: %d\n", state->num_lines);
@@ -185,9 +186,8 @@ void print_state(State *state, int num_columns, int num_rows){
     int b;
 
     for (int i = state->top_line; i < (num_rows + state->top_line); i++) {
-        // printf("i is %d\n", i);
+
         new_line = malloc((num_columns + 1) * sizeof(char));
-        // printf("Line length is %d\n", line_length);
 
         if(i < state->n_lines){
             // printf("IN IF STATEMENT #1\n");
@@ -241,6 +241,7 @@ void print_state(State *state, int num_columns, int num_rows){
         // }
 
         formatted_line_ptrs[i] = new_line; //line;
+        // free(new_line);
         // printf("line is: %s\n", line);
     }
     print_lines(formatted_line_ptrs, num_rows - 2, state->top_line);
@@ -277,24 +278,27 @@ void move_cursor(State *state, int d_row, int d_col)
 
     state->cursor_row += d_row;
     if (state->cursor_row < 0) state->cursor_row = 0;
-    if (state->cursor_row > state->n_lines) state->cursor_row = state->n_lines;
+    if (state->cursor_row > state->top_line + state->window_height){
+        state->cursor_row = state->top_line + state->window_height;
+    }
 
     state->cursor_col += d_col;
     if (state->cursor_col < 0) state->cursor_col = 0;
     if (state->cursor_col > line_len - 1) state->cursor_col = line_len - 1;
-    printf("cursor at row %d col %d\n", state->cursor_row, state->cursor_col);
+    // printf("cursor at row %d col %d\n", state->cursor_row, state->cursor_col);
 
     // adjust window position
-    // TODO: fill this in
-    printf("state->top_line temporarily: %d\n", state->top_line);
-    if (state->cursor_row > state->top_line + state->window_height) {
-        // scroll down
-        state->top_line = state->cursor_row - state->window_height;
-    }
-    if (state->cursor_row < state->top_line) {
-        // scroll up
-        state->top_line = state->cursor_row;
-    }
+    // TODO: this doesn't work
+    // printf("state->top_line temporarily: %d\n", state->top_line);
+    // printf("window_height: %d\n", state->window_height);
+    // if (state->cursor_row > state->top_line + state->window_height) {
+    //     // scroll down
+    //     state->top_line = state->cursor_row - state->window_height;
+    // }
+    // else if (state->cursor_row < state->top_line) {
+    //     // scroll up
+    //     state->top_line = state->cursor_row;
+    // }
 }
 
 void normal_mode_handler(State *state, char input)
@@ -420,12 +424,17 @@ int main (int argc, char *argv[])
         n_env_lines = w.ws_row;
         n_env_cols = w.ws_col;
 //        printf("Number of lines is: %i\n", n_env_lines);
+        state->window_width = n_env_cols;
+        state->window_height = n_env_lines;
 
         // print(state, width, height)
         print_state(state, n_env_cols, n_env_lines);
 
         // get input silently
-        input = getch();
+        // input = getch();
+        system ("/bin/stty raw");
+        input = getchar();
+        system ("/bin/stty cooked");
 
         // update(state)
         update_state(state, input);
