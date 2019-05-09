@@ -4,14 +4,13 @@ The actual amount of problems in the code is not 19.
 Sometimes when you fix one problem, several errors in
 the Error List will clear up.
 
-Other times, fixing one bug will reveal even more problems.
-Even though the number of errors in the list may not match the number
+Even though the number of errors in the list may not match the numb
 of actual problems, the Error List is definitely helpful.
 
-Logical errors: These types of errors are generally far more difficult to
-find and solve. IDEs usually aren't able to detect the problem.
-Logic errors are usually only discovered when the application gives you
-a result you weren't expecting, or behaves in another unexpected way.
+Logical errors: These types of errors are generally far more diffic
+find and solve. IDEs ok hello usually aren't able to detect the pro
+Logic errors are usually only discovered when the application gives
+a result you weren't expecting, or behaves in another unexpected wa
 
 void debugger(){
     if (sad){
@@ -19,7 +18,7 @@ void debugger(){
     }
 
     else {
-        just keep swimming, you'll solve the seg fault eventually.
+        just keep swimming, the seg fault will go away
     }
 }
 
@@ -29,6 +28,6 @@ void debugger(){
 19
 20
 
-and then the end happened.
+and then we were at the end.
 
 P.S C IS STILL FUN< JUST HARD!!!!

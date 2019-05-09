@@ -11,6 +11,7 @@
 #include <termios.h>
 #include <assert.h>
 #include <signal.h>
+#include <math.h>
 
 #define KNRM  "\x1B[0m"  // standard color
 #define KMAG  "\x1B[35m" // magenta
@@ -21,8 +22,15 @@
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
 
-#define BACK "\x1B[34;42m" //background
+#define BACK1 "\x1B[34;42m" //background
+#define BACK2 "\x1B[34;43m" //background
+#define BACK3 "\x1B[34;44m" //background
 #define NORM "\x1B[0m" //Reset:
+
+void handle_sigint(int sig)
+{
+    printf("Caught signal %d\n", sig);
+}
 
 // Read all of the lines from file and put into an array
 // line in an array pointed to by lines_array_ptrd .
@@ -67,6 +75,16 @@ int read_lines_from_file(char *file_name, char ***lines_array_ptr)
     *lines_array_ptr = lines_array;
     // *n_lines_ptr = line_counter;
     return n_lines;
+}
+
+
+// inserts a string into another assuming appropriate buffer space
+char *str_insert(char *destination, char *source, int loc) {
+    char *rest = strdup(destination+loc);
+    destination[loc] = '\0';
+    strcat(destination, source);
+    strcat(destination+strlen(source), rest);
+    return destination;
 }
 
 //returns the number of digits in a number
@@ -125,26 +143,29 @@ State *make_state(char *file_name) {
 /*
  * prints a 2d array of characters
  */
-void print_lines(char **lines_array_ptr, int n_lines, int top)
+void print_lines(char **lines_array_ptr2, int n_lines, int top)
 {
+    // for (int j = top; j < (top + n_lines); j++) {
+    //     printf("%d\n", (int) strlen(lines_array_ptr2[j]));
+    // }
     // printf("top: %d  ", top);
     for (int j = top; j < (top + n_lines); j++) {
         // printf("here\n");
-        printf("%s",lines_array_ptr[j]);
+        printf("%s",lines_array_ptr2[j]);
         // if(j > 0) {
         //     break;
         // }
     }
 }
-
 /*   Prints out the current "state" object
     -formatted lines
     -printed to window
     -prints cursor with color indicator
     -prints Mode
 */
-void print_state(State *state, int num_columns, int num_rows){
-    //print u"\u001b[31mHelloWorld\u001b[0m";
+void print_state_no_lines(State *state, int num_columns, int num_rows){
+
+    // print header
     int mode = state->mode;
     char mode_word[10];
     switch(mode){
@@ -158,92 +179,284 @@ void print_state(State *state, int num_columns, int num_rows){
             strcpy(mode_word, "command");
             break;
     }
-    //printf("\033[1;31m");
-    //printf(BACK "TEST\n");
-    //printf(NORM "STUFF\n");
     printf(KMAG "\nFILE: %s," KCYN " MODE: %s," KYEL " CURSOR %d, %d," KRED " TYPE ':q' TO EXIT\n", state->file_name, mode_word, state->cursor_row, state->cursor_col);
     printf(KNRM);
-    // printf("%s\n");
-    // printf("Number of lines in file is: %d\n", state->num_lines);
-    // int n_lines
-    int gutter_size;
-    // char **raw_lines;
-    char *new_line;
-    // char spaces[5] = "    ";
-    // char zero[3] = "0";
-    // char numbers[3];
-    // calculate gutter size
-    gutter_size = 2 + count_digits(state->top_line + num_rows);
-    // printf("Gutter is %d\n", gutter_size);
 
     char **formatted_line_ptrs = malloc(sizeof(char*) * num_rows);
-    // write raw lines
-
-    // char strC[50];
-
+    int gutter_size = 2 + count_digits(state->top_line + state->window_height);
     char *raw_line;
-    int line_length;
-    int b;
+    char *my_line;
 
     for (int i = state->top_line; i < (num_rows + state->top_line); i++) {
 
-        new_line = malloc((num_columns + 1) * sizeof(char));
+        // empty line for concatination
+        char new_line[state->window_width+20];
+        new_line[0] = '\0';
 
-        if(i < state->n_lines){
-            raw_line = (state->lines)[i];
+        // populate line if past end of file
+        if (i >= state->n_lines){
+            formatted_line_ptrs[i - state->top_line] = "\n";
+            continue;
         }
 
-        else {
-            // printf("IN ELSE\n");
-            raw_line = "something\n";
+        // get raw_line
+        raw_line = (state->lines)[i];
+
+
+        // truncate raw_line;
+        if(strlen(raw_line) > state->window_width + 1 - gutter_size - 5){ // TODO get this right
+            raw_line[state->window_width - gutter_size] = '\n';
+            raw_line[state->window_width - gutter_size + 1] = '\0';
         }
 
-        line_length = strlen(raw_line);
+        if(strlen(raw_line) + gutter_size <= num_columns + 1){
+            // strcat(new_line, raw_line);
+            str_insert(new_line, raw_line, 0);
+        }
+
+        //str_insert(char *destination, char *source, int loc);
+
+        // printf(KNRM);
+        if (i == state->cursor_row) {
+            str_insert(new_line, NORM, state->cursor_col + 1);
+            if (state->mode == normal) str_insert(new_line, BACK1, state->cursor_col);
+            else if (state->mode == insert) str_insert(new_line, BACK2, state->cursor_col);
+            else if (state->mode == command) str_insert(new_line, BACK3, state->cursor_col);
+            // str_insert(new_line, BACK, state->cursor_col);
+        }
+
+        // insert a padded line number into the line
+        // char *padded_line_number;
+        // sprintf(padded_line_number, "%*d  ", gutter_size-2, i);
+        // str_insert(new_line, padded_line_number, 0);
+
+        //     char cursor_line[] = "\0";
+        //     strncpy(cursor_line, new_line, state->cursor_col+gutter_size);
+        //     strcat(cursor_line, BACK);
+        //     strncat(cursor_line, new_line+(state->cursor_col)+gutter_size, 1);
+        //     strcat(cursor_line, NORM);
+        //     strcat(cursor_line, new_line+(state->cursor_col)+gutter_size+1);
+        //
+        //     strcpy(new_line, cursor_line);
+        //     // printf("there\n");
+        // }
+
+        formatted_line_ptrs[i-state->top_line] = strdup(new_line); //line;
+    }
+    print_lines(formatted_line_ptrs, num_rows - 2, state->top_line);
+}
+
+
+/*   Prints out the current "state" object
+    -formatted lines
+    -printed to window
+    -prints cursor with color indicator
+    -prints Mode
+*/
+void print_state_with_lines(State *state, int num_columns, int num_rows){
+
+    // print header
+    int mode = state->mode;
+    char mode_word[10];
+    switch(mode){
+        case 0:
+            strcpy(mode_word, "normal");
+            break;
+        case 1:
+            strcpy(mode_word, "insert");
+            break;
+        case 2:
+            strcpy(mode_word, "command");
+            break;
+    }
+    printf(KMAG "\nFILE: %s," KCYN " MODE: %s," KYEL " CURSOR %d, %d," KRED " TYPE ':q' TO EXIT\n", state->file_name, mode_word, state->cursor_row, state->cursor_col);
+    printf(KNRM);
+
+    char **formatted_line_ptrs = malloc(sizeof(char*) * num_rows);
+    int gutter_size = 2 + count_digits(state->top_line + state->window_height);
+    char *raw_line;
+    char *my_line;
+    char *padded_line_number;
+
+    for (int i = state->top_line; i < (num_rows + state->top_line); i++) {
+
+        // empty line for concatination
+        char new_line[state->window_width+20];
+        new_line[0] = '\0';
+
+        // populate line if past end of file
+        if (i >= state->n_lines){
+            formatted_line_ptrs[i - state->top_line] = " ~ \n";
+            continue;
+        }
+
+        // get raw_line
+        raw_line = (state->lines)[i];
+
+        // truncate raw_line;
+        // if(strlen(raw_line) > state->window_width + 1 - gutter_size -5){ // TODO get this right
+        //     raw_line[state->window_width - gutter_size] = '\n';
+        //     raw_line[state->window_width - gutter_size + 1] = '\0';
+        // }
+
+        // insert raw_line
+        str_insert(new_line, raw_line, 0);
+
+        // add the cursor
+        if (i == state->cursor_row) {
+            str_insert(new_line, NORM, state->cursor_col + 1);
+            str_insert(new_line, BACK1, state->cursor_col);
+        }
+
+        // insert a padded line number into the line
+        sprintf(padded_line_number, "%*d", gutter_size-2, i);
+        str_insert(new_line, padded_line_number, 0);
+
+        // if (i == state->cursor_row) {
+        //     char cursor_line[] = "\0";
+        //     strncpy(cursor_line, new_line, state->cursor_col+gutter_size);
+        //     strcat(cursor_line, BACK);
+        //     strncat(cursor_line, new_line+(state->cursor_col)+gutter_size, 1);
+        //     strcat(cursor_line, NORM);
+        //     strcat(cursor_line, new_line+(state->cursor_col)+gutter_size+1);
+        //
+        //     strcpy(new_line, cursor_line);
+        //     // printf("there\n");
+        // }
+
+        formatted_line_ptrs[i-state->top_line] = strdup(new_line); //line;
+    }
+    print_lines(formatted_line_ptrs, num_rows - 2, state->top_line);
+}
+
+
+/*   Prints out the current "state" object
+    -formatted lines
+    -printed to window
+    -prints cursor with color indicator
+    -prints Mode
+*/
+void print_state(State *state, int num_columns, int num_rows){
+
+    // print header
+    int mode = state->mode;
+    char mode_word[10];
+    switch(mode){
+        case 0:
+            strcpy(mode_word, "normal");
+            break;
+        case 1:
+            strcpy(mode_word, "insert");
+            break;
+        case 2:
+            strcpy(mode_word, "command");
+            break;
+    }
+    printf(KMAG "\nFILE: %s," KCYN " MODE: %s," KYEL " CURSOR %d, %d," KRED " TYPE ':q' TO EXIT\n", state->file_name, mode_word, state->cursor_row, state->cursor_col);
+    printf(KNRM);
+
+
+    int gutter_size = 2 + count_digits(state->top_line + num_rows);
+    char **formatted_line_ptrs = malloc(sizeof(char*) * num_rows);
+    char *raw_line;
+    char *my_line;
+    char padded_line_number[gutter_size-1]; //TODO change to: gutter_size - 1
+
+    // printf("MAX IS %d\n", num_rows + state->top_line);
+
+    for (int i = state->top_line; i < (num_rows + state->top_line); i++) {
+        printf(KYEL);
+
+        char new_line[state->window_width+20]; // extra buffer for color codes
+        new_line[0] = '\0';
+        // new_line = malloc((num_columns + 1) * sizeof(char));
+
+        // populate line if past end of file
+        if (i >= state->n_lines){
+            formatted_line_ptrs[i - state->top_line] = "\n";
+            continue;
+            // raw_line = (state->lines)[i];
+        }
+        // else {
+        //     // printf("IN ELSE\n");
+        //     raw_line = "something\n";
+        // }
+
+        // line_length = strlen(raw_line);
         // printf("Line length is: %d\n", line_length);
-        // printf("newline is: %s\n", newline);
+        // printf("new_line is: %s\n", new_line);
+
+        // add the padded_line_ number
+        // printf("padded line number length: %d\n", (int) strlen(padded_line_number));
+        // sprintf(padded_line_number, "%*d", gutter_size-2, i);
+        // printf("padded number is: %s\n", padded_line_number);
+        // strcat(new_line, padded_line_number);
+        // printf("new_line is: %s\n, and this long: %d\n", new_line, (int) strlen(new_line));
+
+        // add gutter spaces
+        // strcat(new_line, "  ");
+
+        // get line
+        raw_line = (state->lines)[i];
+
+        // if no cursor add rest of line
+        // if (i != state->cursor_row) {
+            // no truncation
+            if(strlen(raw_line) + gutter_size <= num_columns + 1){
+                // printf("CAT raw string to new string\n");
+                strcat(new_line, raw_line);
+                // printf("new line + cat: %s\n", new_line);
+            }
+            // with truncation
+            // else{
+            //     strncat(new_line, raw_line, num_columns-gutter_size); //dest, source, size
+            //     if (strchr(new_line, '\n') == NULL){
+            //         strcat(new_line, "\n");
+            //     }
+            // }
+        // }
+
+
+        // if (i == state->cursor_row) {
+        //     char cursor_line[] = "\0";
+        //     strncpy(cursor_line, new_line, state->cursor_col+gutter_size);
+        //     strcat(cursor_line, BACK);
+        //     strncat(cursor_line, new_line+(state->cursor_col)+gutter_size, 1);
+        //     strcat(cursor_line, NORM);
+        //     strcat(cursor_line, new_line+(state->cursor_col)+gutter_size+1);
+        //
+        //     strcpy(new_line, cursor_line);
+        //     // printf("there\n");
+        // }
 
         //fill gutter with spaces
-        for(b = 0; b < gutter_size; b++) {
-            new_line[b] = ' ';
-        }
-        new_line[b] = '\0'; //adding null terminator
-
-        // char line_number[gutter_size - 2];
-        int offset = gutter_size - 2 - count_digits(i);
-        // printf("offset is: %d\n", offset);
-        sprintf(new_line + offset, "%d", i); //convert int to string
-        strcat(new_line, " ");// // printf("%s\n", new_line);
-
-        if(line_length + gutter_size < num_columns){
-            strncat(new_line, raw_line, line_length);
-        }
-        else{
-            strncat(new_line, raw_line, num_columns-gutter_size); //dest, source, size
-            if (strchr(new_line, '\n') == NULL){
-                strcat(new_line, "\n");
-            }
-        }
-
-        // add cursor to raw_line
-        // printf("here\n");
-        if (i == state->cursor_row) {
-            char cursor_line[] = "\0";
-            strncpy(cursor_line, new_line, state->cursor_col+gutter_size);
-            strcat(cursor_line, BACK);
-            strncat(cursor_line, new_line+(state->cursor_col)+gutter_size, 1);
-            strcat(cursor_line, NORM);
-            strcat(cursor_line, new_line+(state->cursor_col)+gutter_size+1);
-
-            new_line = cursor_line;
-            // printf("there\n");
-        }
-
-        formatted_line_ptrs[i] = new_line; //line;
-        // printf("line is: %s\n", line);
+        // for(b = 0; b < gutter_size; b++) {
+        //     new_line[b] = ' ';
+        // }
+        // new_line[b] = '\0'; //adding null terminator
+        //
+        // // char line_number[gutter_size - 2];
+        // int offset = gutter_size - 2 - count_digits(i);
+        // // printf("offset is: %d\n", offset);
+        // sprintf(new_line + offset, "%d", i); //convert int to string
+        // strcat(new_line, "  ");// // printf("%s\n", new_line);
+        //
+        //
+        // // add cursor to raw_line
+        // // printf("here\n");
+        // printf("i is: %d\n", i);
+        // memset(my_line, '\0', sizeof(my_line));
+        // strcpy(my_line, new_line);
+        formatted_line_ptrs[i-state->top_line] = strdup(new_line); //line;
+        // printf("strdup line: %s\n", new_line);
+        // printf("raw line is: %s", raw_line);
     }
+    // printf("did we make it?\n");
+    // printf(KRED);
     print_lines(formatted_line_ptrs, num_rows - 2, state->top_line);
     // print_lines((state->lines), 24);
     // TODO: for line in formatted_line_ptrs free(line)
+    printf(KBLU);
 }
 
 
@@ -327,6 +540,7 @@ void normal_mode_handler(State *state, char input)
     }
 }
 
+
 void insert_char(State *state, char c)
 {
     char *line = state->lines[state->cursor_row];
@@ -343,12 +557,16 @@ void insert_char(State *state, char c)
 
 void insert_mode_handler(State *state, char input)
 {
+    char s[2];
+    s[0] = input;
+    s[1] = '\0';
     switch (input) {
         case '\x1b': // 1b is the ESC character's hex value
             state->mode = normal;
             break;
         default:
-            insert_char(state, input);
+            str_insert(state->lines[state->cursor_row], s, state->cursor_col);
+            move_cursor(state, 0, 1);
     }
 }
 
@@ -400,8 +618,11 @@ void update_state(State *state, char input)
     }
 }
 
+
+
 int main (int argc, char *argv[])
 {
+    // signal(SIGINT, handle_sigint);
     // declarations
     struct winsize w;
     int n_env_lines, n_env_cols;
@@ -426,7 +647,8 @@ int main (int argc, char *argv[])
         state->window_height = n_env_lines;
 
         // print(state, width, height)
-        print_state(state, n_env_cols, n_env_lines);
+        print_state_no_lines(state, n_env_cols, n_env_lines);
+        printf(KMAG);
 
         // get input silently
         // input = getch();
@@ -441,7 +663,7 @@ int main (int argc, char *argv[])
     // write file
     // write_state_to_file(argv[1]);
     // cleanup
-    // free(state);
+    free(state);
 
     return 0;
 }
