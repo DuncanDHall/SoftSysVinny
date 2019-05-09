@@ -4,6 +4,8 @@
 
 *Ilya Besancon and Duncan Hall*
 
+# NB: this is not complete yet, we're still working on bugs
+
 ## Description
 
 This is Vinny, a command-line text editor in C that clones some of vim's basic features. Vinny currently has limited functionality, but the core structure of a text editor was the primary goal for the project. Vinny allows switching of modes, navigation of a cursor, an insertion and deletion of characters, and a command mode for saving and quitting, all with a basic view displaying lines, line numbers, mode, and cursor.
