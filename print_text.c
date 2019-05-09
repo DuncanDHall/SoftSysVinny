@@ -20,6 +20,9 @@
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
 
+#define BACK "\x1B[34;42m" //background
+#define NORM "\x1B[0m" //Reset:
+
 // Read all of the lines from file and put into an array
 // line in an array pointed to by lines_array_ptrd .
 int read_lines_from_file(char *file_name, char ***lines_array_ptr)
@@ -57,7 +60,7 @@ int read_lines_from_file(char *file_name, char ***lines_array_ptr)
         lines_array[line_counter] = strdup(line);
         line_counter++;
     }
-    free(line); //free line buffer
+    // free(line); //free line buffer
     fclose(fp);
 
     *lines_array_ptr = lines_array;
@@ -108,12 +111,12 @@ State *make_state(char *file_name) {
     State *state = malloc(sizeof(State)); //dynamically allocate memory
     state->n_lines = read_lines_from_file(file_name, &(state->lines)); //TODO change to num_lines
     strcpy(state->file_name, file_name);
-    state->top_line = 0;
+    state->top_line = 5;
     // state->window_width = num_cols;
     // state->window_height = num_rows;
     state->mode = normal;
     state->cursor_row = 0;
-    state-> cursor_col = 0;
+    state->cursor_col = 0;
 
     return state;
 }
@@ -123,13 +126,13 @@ State *make_state(char *file_name) {
  */
 void print_lines(char **lines_array_ptr, int n_lines, int top)
 {
-    printf("top: %d", top);
+    // printf("top: %d  ", top);
     for (int j = top; j < (top + n_lines); j++) {
-        printf("here\n");
+        // printf("here\n");
         printf("%s",lines_array_ptr[j]);
-        if(j > 0) {
-            break;
-        }
+        // if(j > 0) {
+        //     break;
+        // }
     }
 }
 
@@ -155,8 +158,11 @@ void print_state(State *state, int num_columns, int num_rows){
             break;
     }
     //printf("\033[1;31m");
+    //printf(BACK "TEST\n");
+    //printf(NORM "STUFF\n");
     printf(KMAG "FILE: %s," KCYN " MODE: %s.\n", state->file_name, mode_word);
     printf(KNRM);
+    // printf("%s\n");
     // printf("Number of lines in file is: %d\n", state->num_lines);
     // int n_lines
     int gutter_size;
@@ -198,7 +204,7 @@ void print_state(State *state, int num_columns, int num_rows){
         // printf("newline is: %s\n", newline);
 
         //fill gutter with spaces
-        for(b =0; b < gutter_size; b++) {
+        for(b = 0; b < gutter_size; b++) {
             new_line[b] = ' ';
         }
         new_line[b] = 'c'; //adding null terminator
@@ -214,7 +220,26 @@ void print_state(State *state, int num_columns, int num_rows){
         }
         else{
             strncat(new_line, raw_line, num_columns-gutter_size); //dest, source, size
+            if (strchr(new_line, '\n') == NULL){
+                strcat(new_line, "\n");
+            }
         }
+
+        // add cursor to raw_line
+        // printf("here\n");
+        // if (i == state->cursor_row) {
+        //     char cursor_line[] = "\0";
+        //     strncat(cursor_line, new_line, state->cursor_col+gutter_size);
+        //     strcat(cursor_line, BACK);
+        //     strncat(cursor_line, raw_line+state->cursor_col+gutter_size, 1);
+        //     strcat(cursor_line, NORM);
+        //     strcat(cursor_line, raw_line+state->cursor_col+gutter_size+1);
+        //
+        //     new_line = cursor_line;
+        //     // free(cursor_line);
+        //     printf("there\n");
+        // }
+
         formatted_line_ptrs[i] = new_line; //line;
         // printf("line is: %s\n", line);
     }
@@ -257,10 +282,11 @@ void move_cursor(State *state, int d_row, int d_col)
     state->cursor_col += d_col;
     if (state->cursor_col < 0) state->cursor_col = 0;
     if (state->cursor_col > line_len - 1) state->cursor_col = line_len - 1;
-    // printf("cursor at row %d col %d\n", state->cursor_row, state->cursor_col);
+    printf("cursor at row %d col %d\n", state->cursor_row, state->cursor_col);
 
     // adjust window position
     // TODO: fill this in
+    printf("state->top_line temporarily: %d\n", state->top_line);
     if (state->cursor_row > state->top_line + state->window_height) {
         // scroll down
         state->top_line = state->cursor_row - state->window_height;
@@ -310,7 +336,7 @@ void insert_char(State *state, char c)
 
     state->lines[state->cursor_row] = strdup(new_line);
     state->cursor_col++;
-    free(line);
+    // free(line);
 }
 
 void insert_mode_handler(State *state, char input)
@@ -379,7 +405,7 @@ int main (int argc, char *argv[])
     int n_env_lines, n_env_cols;
     // char **lines_array;
     char input;
-
+    // input = getch();
     // make state (reading from file)
     State *state = make_state(argv[1]);
 
@@ -408,7 +434,7 @@ int main (int argc, char *argv[])
     // write file
     // write_state_to_file(argv[1]);
     // cleanup
-    // free stuff
+    // free(state);
 
     return 0;
 }
