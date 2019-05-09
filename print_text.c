@@ -190,30 +190,29 @@ void print_state(State *state, int num_columns, int num_rows){
         new_line = malloc((num_columns + 1) * sizeof(char));
 
         if(i < state->n_lines){
-            // printf("IN IF STATEMENT #1\n");
             raw_line = (state->lines)[i];
-            // printf("giberrish/ :%s\n", newline);
-             //accounting for endchar
         }
+
         else {
             // printf("IN ELSE\n");
             raw_line = "something\n";
         }
 
         line_length = strlen(raw_line);
+        // printf("Line length is: %d\n", line_length);
         // printf("newline is: %s\n", newline);
 
         //fill gutter with spaces
         for(b = 0; b < gutter_size; b++) {
             new_line[b] = ' ';
         }
-        new_line[b] = 'c'; //adding null terminator
+        new_line[b] = '\0'; //adding null terminator
 
         // char line_number[gutter_size - 2];
         int offset = gutter_size - 2 - count_digits(i);
         // printf("offset is: %d\n", offset);
         sprintf(new_line + offset, "%d", i); //convert int to string
-        strcat(new_line, "  ");// // printf("%s\n", new_line);
+        strcat(new_line, " ");// // printf("%s\n", new_line);
 
         if(line_length + gutter_size < num_columns){
             strncat(new_line, raw_line, line_length);
@@ -227,25 +226,24 @@ void print_state(State *state, int num_columns, int num_rows){
 
         // add cursor to raw_line
         // printf("here\n");
-        // if (i == state->cursor_row) {
-        //     char cursor_line[] = "\0";
-        //     strncat(cursor_line, new_line, state->cursor_col+gutter_size);
-        //     strcat(cursor_line, BACK);
-        //     strncat(cursor_line, raw_line+state->cursor_col+gutter_size, 1);
-        //     strcat(cursor_line, NORM);
-        //     strcat(cursor_line, raw_line+state->cursor_col+gutter_size+1);
-        //
-        //     new_line = cursor_line;
-        //     // free(cursor_line);
-        //     printf("there\n");
-        // }
+        if (i == state->cursor_row) {
+            char cursor_line[] = "\0";
+            strncpy(cursor_line, new_line, state->cursor_col+gutter_size);
+            strcat(cursor_line, BACK);
+            strncat(cursor_line, new_line+(state->cursor_col)+gutter_size, 1);
+            strcat(cursor_line, NORM);
+            strcat(cursor_line, new_line+(state->cursor_col)+gutter_size+1);
+
+            new_line = cursor_line;
+            // printf("there\n");
+        }
 
         formatted_line_ptrs[i] = new_line; //line;
-        // free(new_line);
         // printf("line is: %s\n", line);
     }
     print_lines(formatted_line_ptrs, num_rows - 2, state->top_line);
     // print_lines((state->lines), 24);
+    // TODO: for line in formatted_line_ptrs free(line)
 }
 
 

@@ -8,11 +8,21 @@ Other times, fixing one bug will reveal even more problems.
 Even though the number of errors in the list may not match the number
 of actual problems, the Error List is definitely helpful.
 
-Logical errors: These types of errors are generally far more difficult to find and solve.
-IDEs usually aren't able to detect the problem.
-Logic errors are usually only discovered when the application gives you a result you weren't expecting, or behaves in another unexpected way.
+Logical errors: These types of errors are generally far more difficult to
+find and solve. IDEs usually aren't able to detect the problem.
+Logic errors are usually only discovered when the application gives you
+a result you weren't expecting, or behaves in another unexpected way.
 
-15
+void debugger(){
+    if (sad){
+        try again in 5 minutes;
+    }
+
+    else {
+        just keep swimming, you'll solve the seg fault eventually.
+    }
+}
+
 16
 17
 18
