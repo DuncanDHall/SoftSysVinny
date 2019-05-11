@@ -6,7 +6,7 @@
 
 ## Description
 
-This is Vinny, a command-line text editor in C that clones some of vim's basic features. Vinny currently has limited functionality, but the core structure of a text editor was the primary goal for the project. Vinny allows switching of modes, navigation of a cursor, an insertion and deletion of characters, and a command mode for saving and quitting, all with a basic view displaying lines, line numbers, mode, and cursor.
+This is Vinny, a command-line text editor in C that clones some of vim's basic features. Vinny currently has limited functionality, but the core structure of a text editor was the primary goal for the project. Vinny allows switching of modes, navigation of a cursor, an insertion and deletion of characters, and a command mode for saving and quitting, all with a basic view displaying lines, line numbers, mode, and a cursor.
 
 ## Code Structure
 
@@ -112,7 +112,7 @@ Although we faced the aforementioned challenges, we were able to get a working v
 
 ## Reflection
 
-We wanted to write a program in C to explore our learnings of the semester through a command-line text editor - and we (somewhat) made one! This was an excellent project to put the concepts we learned about this year into practice. That being said, the requisites of successful memory management were not fully met, though we did a good job working with file pointers, command line arguments and with our Model View Architecture.
+We wanted to write a program in C to explore our learnings of the semester through a command-line text editor - and we (somewhat) made one! This was an excellent project to put the concepts we learned about this year into practice. That being said, the requisites of successful memory management were not fully met, though we did a good job working with file pointers, command line arguments and with our MVC Architecture.
 
 In order to avoid such a whack-a-mole type development pattern in future projects, we discussed the merits of using tests and sticking to a disciplined git-inspired workflow for parallel development rather than continuing using teletype for atom, a plugin which allows for concurrent editing of a file by two or more developers. This was not optimal as one of us would necessarily not have access to the code locally for running, and each would have to comment out the functionality they were currently writing whenever the other wanted to try to compile and run.
 
